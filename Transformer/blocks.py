@@ -441,7 +441,7 @@ class DecoderBlock(nn.Module):
         cross_attn_input = self.norm2(x)
         # Normalizing
 
-        cross_attn_output = self.cross_attention_layer(cross_attn_input, encoder_output)
+        cross_attn_output = self.cross_attention_layer(encoder_output, cross_attn_input)
         # Passing though cross attention layer
 
         x = x + self.dropout(cross_attn_output)
