@@ -376,7 +376,7 @@ class EncoderBlock(nn.Module):
         self.num_heads = num_heads
         self.hidden_dim = hidden_dim 
         self.attention_layer = MultiHeadAttention(self.d_model, self.num_heads)
-        self.ffnn = FFNN(self.d_model, self.hidden_dim)
+        self.ffnn = FFNN(self.d_model, self.hidden_dim, dropout_rate=dropout_rate)
         self.norm1= nn.LayerNorm(self.d_model)
         self.norm2 = nn.LayerNorm(self.d_model)
         self.dropout = nn.Dropout(p=dropout_rate)
@@ -416,7 +416,7 @@ class DecoderBlock(nn.Module):
         self.hidden_dim = hidden_dim 
         self.cross_attention_layer = CrossMultiHeadAttention(self.d_model, self.num_heads)
         self.masked_attention_layer = MaskedMultiHeadAttention(self.d_model, self.num_heads)
-        self.ffnn = FFNN(self.d_model, self.hidden_dim)
+        self.ffnn = FFNN(self.d_model, self.hidden_dim, dropout_rate=dropout_rate)
         self.norm1= nn.LayerNorm(self.d_model)
         self.norm2 = nn.LayerNorm(self.d_model)
         self.norm3 = nn.LayerNorm(self.d_model)
