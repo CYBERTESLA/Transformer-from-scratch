@@ -462,56 +462,40 @@ class DecoderBlock(nn.Module):
 # Now, Stack Multiple Encoders:
 class EncoderStack(nn.Module):
     
-    def __init__(self, vocab_size: int, d_model: int, num_heads: int, hidden_dim: int, num_blocks: int, dropout_rate: float = 0.1):
+    def __init__(self, d_model: int, num_heads: int, hidden_dim: int, num_blocks: int, dropout_rate: float = 0.1):
         super().__init__()
         self.d_model = d_model
-        self.embedding = nn.Embedding(vocab_size, d_model)
-        self.positional_encoding = PositionalEncoding()
         self.layers = nn.ModuleList([EncoderBlock(d_model, num_heads, hidden_dim) for _ in range(num_blocks)])
         self.norm_1 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(p=dropout_rate)
         
-    def forward(self, tokens: torch.Tensor) -> torch.Tensor: 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # Dimension of tokens: (batch_size, num_tokens) 
-
-        embedded = self.embedding(tokens) 
-        # Dimension: (batch_size, batch_size, d_model)
-
-        embedded_scaled = embedded * math.sqrt(self.d_model)
-        positional_embedding = self.positional_encoding(embedded_scaled)
-        x = self.dropout(positional_embedding)
 
         for layer in self.layers:
             x = layer(x)
         output = self.norm_1(x)
+        # Dimension: (Batch_size, num_tokens, d_model)
 
         return output
     
 # Now, Stack Multiple Decoders:
 class DecoderStack(nn.Module):
     
-    def __init__(self, vocab_size: int, d_model: int, num_heads: int, hidden_dim: int, num_blocks: int, dropout_rate: float = 0.1):
+    def __init__(self, d_model: int, num_heads: int, hidden_dim: int, num_blocks: int, dropout_rate: float = 0.1):
         super().__init__()
         self.d_model = d_model
-        self.embedding = nn.Embedding(vocab_size, d_model)
-        self.positional_encoding = PositionalEncoding()
         self.layers = nn.ModuleList([DecoderBlock(d_model, num_heads, hidden_dim) for _ in range(num_blocks)])
         self.norm_1 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(p=dropout_rate)
         
-    def forward(self, tokens: torch.Tensor, encoder_output: torch.Tensor) -> torch.Tensor: 
-        # Dimension of tokens: (batch_size, num_tokens) 
-
-        embedded = self.embedding(tokens) 
-        # Dimension: (batch_size, num_tokens, d_model)
-        
-        embedded_scaled = embedded * math.sqrt(self.d_model)
-        positional_embedding = self.positional_encoding(embedded_scaled)
-        x = self.dropout(positional_embedding)
+    def forward(self, x: torch.Tensor, encoder_output: torch.Tensor) -> torch.Tensor:
+        # Dimension of tokens: (batch_size, num_tokens)
 
         for layer in self.layers:
             x = layer(x, encoder_output)
         output = self.norm_1(x)
+        # Dimension: (Batch_size, num_tokens, d_model)
 
         return output
     
